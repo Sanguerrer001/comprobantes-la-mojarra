@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Comprobantes · La Mojarra</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#f2f8fa;--surface:#fff;--ice:#d9eef3;--navy:#16285e;--aqua:#1f9fae;--coral:#e5462b;--fg:#16233f;--muted:#5b6b80;--line:#d4e2e8;
+  --wa:#1a8f4c;--on-navy:#fff;--ok-bg:#e3f5ea;--shadow:0 1px 2px rgba(22,40,94,.06),0 10px 30px rgba(22,40,94,.08);
+  --f-display:"Lilita One","Arial Rounded MT Bold",sans-serif;--f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1324;--surface:#132039;--ice:#18304b;--navy:#cfe2ff;--aqua:#4cc6d3;--coral:#ff7a5c;--fg:#e7eef8;--muted:#9fb0c6;--line:#24385a;--wa:#25a85b;--on-navy:#0b1324;--ok-bg:#163a28;--shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.3);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0b1324;--surface:#132039;--ice:#18304b;--navy:#cfe2ff;--aqua:#4cc6d3;--coral:#ff7a5c;--fg:#e7eef8;--muted:#9fb0c6;--line:#24385a;--wa:#25a85b;--on-navy:#0b1324;--ok-bg:#163a28;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.45;padding-bottom:env(safe-area-inset-bottom,0px)}
+button,input{font:inherit;color:inherit}
+[hidden]{display:none!important}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+header{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#0f2160,#15438a 60%,#1f9fae);color:#fff;padding-top:env(safe-area-inset-top,0px);box-shadow:0 4px 18px rgba(0,0,0,.15)}
+.hd{display:flex;align-items:center;gap:12px;padding:12px 0}
+.hd img{width:42px;height:42px;border-radius:50%;background:#fff;flex:none}
+.hd h1{font-family:var(--f-display);font-weight:400;font-size:1.45rem;margin:0;line-height:1.05;flex:1;min-width:0}
+.hd h1 small{display:block;font-family:var(--f-body);font-size:.78rem;font-weight:600;opacity:.85}
+.hbtn{border:0;background:rgba(255,255,255,.16);color:#fff;border-radius:12px;min-height:40px;padding:0 12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.hbtn svg{width:18px;height:18px}
+.hbtn.spin svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.bar{display:flex;gap:8px;padding:0 0 12px;flex-wrap:wrap}
+.bar input{flex:1 1 200px;min-width:0;border:0;border-radius:12px;padding:10px 14px;background:rgba(255,255,255,.95);color:#16233f;font-size:16px}
+.seg{display:flex;background:rgba(255,255,255,.16);border-radius:12px;padding:3px}
+.seg button{border:0;background:transparent;color:#fff;border-radius:9px;padding:7px 12px;font-weight:700;cursor:pointer}
+.seg button[aria-pressed="true"]{background:#fff;color:#16285e}
+main{padding:16px 0 40px}
+.note{color:var(--muted);font-size:.9rem;margin:0 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;gap:10px;box-shadow:var(--shadow);position:relative}
+.card.new{border-color:var(--aqua);box-shadow:0 0 0 2px var(--aqua) inset,var(--shadow)}
+.card.new::before{content:"Nuevo";position:absolute;top:-9px;right:14px;background:var(--coral);color:#fff;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 9px;border-radius:99px}
+.c-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.folio{font-family:var(--f-display);font-weight:400;color:var(--navy);font-size:1.25rem;line-height:1.1;overflow-wrap:anywhere}
+.when{color:var(--muted);font-size:.82rem;white-space:nowrap}
+.who{font-weight:700;font-size:1.02rem;line-height:1.25}
+.meta{display:flex;flex-wrap:wrap;gap:6px}
+.pill{background:var(--ice);color:var(--navy);border-radius:99px;padding:3px 10px;font-size:.82rem;font-weight:700}
+.pill.tot{background:var(--ok-bg);color:var(--wa)}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap}
+.thumb{width:96px;height:120px;border-radius:12px;border:1px solid var(--line);overflow:hidden;background:var(--bg);cursor:zoom-in;padding:0;position:relative;flex:none}
+.thumb img{width:96px;height:120px;object-fit:cover;display:block}
+.thumb .pdf{display:grid;place-items:center;height:100%;font-weight:800;color:var(--coral);font-size:1.1rem}
+.thumb .bad{display:grid;place-items:center;height:100%;font-size:.72rem;color:var(--muted);padding:6px;text-align:center}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--bg);color:var(--navy);border-radius:11px;padding:8px 12px;font-weight:700;font-size:.88rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;min-height:40px}
+.btn.primary{background:var(--navy);color:var(--on-navy);border-color:var(--navy)}
+.btn.danger{color:var(--coral);border-color:transparent;background:transparent;margin-left:auto}
+.empty,.err{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:28px 20px;text-align:center;color:var(--muted)}
+.empty b,.err b{display:block;color:var(--fg);font-size:1.1rem;margin-bottom:4px}
+.err{border-color:var(--coral)}
+.more{display:flex;justify-content:center;margin-top:16px}
+/* Inicio de sesión */
+.login{max-width:560px;margin:24px auto;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:var(--shadow)}
+.login h2{font-family:var(--f-display);font-weight:400;color:var(--navy);font-size:1.6rem;margin:0 0 6px}
+.login p{margin:0 0 12px;color:var(--muted)}
+.login ol{margin:0 0 16px;padding-left:22px;display:grid;gap:6px}
+.login a{color:var(--aqua);font-weight:700}
+.login label{display:grid;gap:6px;font-weight:700;font-size:.9rem}
+.login input[type=password],.login input[type=text]{border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:11px 13px;width:100%;font-size:16px}
+.login .chk{display:flex;align-items:center;gap:8px;font-weight:600;margin:12px 0;font-size:.92rem}
+.login .chk input{width:20px;height:20px}
+.login .go{width:100%;justify-content:center;font-size:1rem;padding:12px}
+.login .lerr{color:var(--coral);font-weight:600;margin:10px 0 0}
+.login .safe{font-size:.82rem;margin-top:14px;background:var(--bg);border-radius:12px;padding:10px 12px}
+/* Visor */
+.lb{position:fixed;inset:0;z-index:50;background:rgba(5,12,30,.92);display:flex;flex-direction:column;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.lb-h{display:flex;align-items:center;gap:8px;padding:10px 12px;color:#fff}
+.lb-h b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-h .hbtn{background:rgba(255,255,255,.18)}
+.lb-b{flex:1;min-height:0;display:grid;place-items:center;padding:8px;overflow:auto}
+.lb-b img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;background:#fff}
+.lb-f{color:#cfe2ff;text-align:center;font-size:.82rem;padding:6px 12px 12px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--navy);color:var(--on-navy);padding:10px 16px;border-radius:99px;font-weight:700;z-index:60;box-shadow:var(--shadow);max-width:calc(100vw - 32px)}
+@media (max-width:520px){.grid{grid-template-columns:minmax(0,1fr)}.hbtn .t{display:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="hd">
+      <img src="icon-192.png" alt="">
+      <h1>Comprobantes<small id="sub">Pescadería La Mojarra · solo para el negocio</small></h1>
+      <button class="hbtn" id="refresh" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="t">Actualizar</span></button>
+      <button class="hbtn" id="logout" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="t">Salir</span></button>
+    </div>
+    <div class="bar" id="bar" hidden>
+      <input type="search" id="q" placeholder="Buscar por folio o nombre…" aria-label="Buscar por folio o nombre">
+      <div class="seg" role="group" aria-label="Periodo"><button type="button" data-p="hoy" aria-pressed="false">Hoy</button><button type="button" data-p="7" aria-pressed="false">7 días</button><button type="button" data-p="todo" aria-pressed="true">Todos</button></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="login" id="login" hidden>
+    <h2>Entrar al visor</h2>
+    <p>Aquí ves los comprobantes de transferencia que tus clientes suben al hacer su pedido. Necesitas una <b>clave de acceso de Netlify</b> (solo se hace una vez):</p>
+    <ol>
+      <li>Entra a <a href="https://app.netlify.com/user/applications#personal-access-tokens" target="_blank" rel="noopener">Netlify → Applications</a> con tu cuenta.</li>
+      <li>En <b>Personal access tokens</b> toca <b>New access token</b>.</li>
+      <li>Nombre: <b>Visor comprobantes</b>. Vencimiento: el más largo que te deje.</li>
+      <li>Toca <b>Generate token</b>, cópiala y pégala aquí abajo.</li>
+    </ol>
+    <form id="lform">
+      <label for="tok">Clave de acceso
+        <input type="password" id="tok" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Pega aquí tu clave">
+      </label>
+      <label class="chk" for="rem"><input type="checkbox" id="rem" checked> Recordarla en este dispositivo</label>
+      <button class="btn primary go" type="submit" id="goBtn">Entrar</button>
+      <p class="lerr" id="lerr" hidden></p>
+    </form>
+    <p class="safe">🔒 La clave se guarda solo en este celular o computadora, nunca en la página. No la compartas: da acceso a tu cuenta de Netlify. Si la pierdes o alguien la ve, bórrala en Netlify y crea otra.</p>
+  </section>
+
+  <section id="app" hidden>
+    <p class="note" id="note"></p>
+    <div class="grid" id="grid"></div>
+    <div class="more"><button class="btn" id="more" hidden>Cargar más</button></div>
+  </section>
+</main>
+
+<div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Comprobante">
+  <div class="lb-h"><b id="lbT"></b><a class="hbtn" id="lbOpen" href="#" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="t">Abrir / guardar</span></a><button class="hbtn" id="lbX" aria-label="Cerrar">✕</button></div>
+  <div class="lb-b" id="lbB"></div>
+  <div class="lb-f" id="lbF">En celular: abre la foto y mantenla presionada para guardarla.</div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(()=>{
+const SITE = location.hostname && !/^(localhost|127\.|tienda\.test)/.test(location.hostname) ? location.hostname : "pescaderia-la-mojarra.netlify.app";
+const API = "https://api.netlify.com/api/v1";
+const FORM = "comprobantes", KEY = "lamojarra-netlify-token", SEEN = "lamojarra-visto";
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let token = "", formId = "", subs = [], page = 1, hasMore = false, period = "todo", busy = false, lastSeen = 0, timer = 0;
+
+function store(k, v){ try{ if(v==null) localStorage.removeItem(k); else localStorage.setItem(k, v); }catch(e){} }
+function load(k){ try{ return localStorage.getItem(k) || ""; }catch(e){ return ""; } }
+function sload(k){ try{ return sessionStorage.getItem(k) || ""; }catch(e){ return ""; } }
+function toast(t){ const el=$("toast"); el.textContent=t; el.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>el.hidden=true,2600); }
+
+class ApiError extends Error{ constructor(kind, status){ super(kind); this.kind=kind; this.status=status; } }
+async function api(path, opts={}){
+  const sep = path.includes("?") ? "&" : "?";
+  const method = opts.method || "GET";
+  // GET con la clave en la dirección: evita la verificación previa del navegador.
+  const url = API + path + (method==="GET" ? `${sep}access_token=${encodeURIComponent(token)}` : "");
+  const c = new AbortController(), t = setTimeout(()=>c.abort(), 20000);
+  let r;
+  try{
+    r = await fetch(url, { method, signal:c.signal, headers: method==="GET" ? undefined : { Authorization: "Bearer " + token } });
+  }catch(e){ throw new ApiError(e && e.name==="AbortError" ? "lento" : "red"); }
+  finally{ clearTimeout(t); }
+  if(r.status===401 || r.status===403) throw new ApiError("clave", r.status);
+  if(r.status===404) throw new ApiError("no-existe", 404);
+  if(!r.ok) throw new ApiError("servidor", r.status);
+  if(r.status===204) return null;
+  const txt = await r.text(); return txt ? JSON.parse(txt) : null;
+}
+function errText(e){
+  const k = e && e.kind;
+  if(k==="clave") return ["La clave no funciona", "Revisa que la copiaste completa o crea una nueva en Netlify."];
+  if(k==="no-existe") return ["Aún no hay formulario de comprobantes", "Activa Forms → Enable form detection en Netlify, vuelve a subir el zip y haz un pedido de prueba con transferencia y foto."];
+  if(k==="lento") return ["Netlify tardó demasiado", "Revisa tu internet y toca Actualizar."];
+  if(k==="red") return ["No hay conexión con Netlify", "Revisa tu internet. Si sigue igual, avísale a quien te hizo la tienda."];
+  return ["Netlify respondió con un error", "Intenta de nuevo en unos minutos."];
+}
+
+async function findForm(){
+  let forms;
+  try{ forms = await api(`/sites/${encodeURIComponent(SITE)}/forms`); }
+  catch(e){
+    if(e.kind!=="no-existe") throw e;
+    const sites = await api(`/sites?filter=all&per_page=100&name=${encodeURIComponent(SITE.split(".")[0])}`) || [];
+    const s = sites.find(x => (x.ssl_url||x.url||"").includes(SITE) || x.name===SITE.split(".")[0] || x.custom_domain===SITE);
+    if(!s) throw new ApiError("no-existe", 404);
+    forms = await api(`/sites/${s.id || s.site_id}/forms`);
+  }
+  const f = (forms||[]).find(x => x.name===FORM);
+  if(!f) throw new ApiError("no-existe", 404);
+  return f.id;
+}
+
+function fileOf(v){
+  if(!v) return null;
+  if(typeof v==="string") return /^https?:\/\//.test(v) ? {url:v, name:v.split("/").pop().split("?")[0]} : null;
+  if(typeof v==="object" && v.url) return {url:v.url, name:v.filename||v.name||v.url.split("/").pop().split("?")[0], type:v.type||""};
+  return null;
+}
+function norm(s){
+  const d = s.data || {}, h = s.human_fields || {};
+  const pick = k => d[k] ?? h[k] ?? h[k.charAt(0).toUpperCase()+k.slice(1)] ?? s[k] ?? "";
+  const files = [1,2,3].map(i => fileOf(d["comprobante"+i] ?? h["Comprobante"+i] ?? h["comprobante"+i])).filter(Boolean);
+  return { id:s.id, t:new Date(s.created_at||Date.now()).getTime(), folio:String(pick("folio")), nombre:String(pick("nombre")), total:String(pick("total")), entrega:String(pick("entrega")), files };
+}
+
+const fmtWhen = t => {
+  const d = new Date(t), now = new Date(), y = new Date(now); y.setDate(now.getDate()-1);
+  const hr = d.toLocaleTimeString("es-MX",{hour:"numeric",minute:"2-digit"});
+  if(d.toDateString()===now.toDateString()) return "Hoy, "+hr;
+  if(d.toDateString()===y.toDateString()) return "Ayer, "+hr;
+  return d.toLocaleDateString("es-MX",{weekday:"short",day:"numeric",month:"short"})+", "+hr;
+};
+const isPdf = f => /pdf/i.test(f.type||"") || /\.pdf$/i.test(f.name||"");
+
+function visible(){
+  const q = $("q").value.trim().toLowerCase();
+  const start = new Date(); start.setHours(0,0,0,0);
+  const min = period==="hoy" ? start.getTime() : period==="7" ? Date.now()-7*864e5 : 0;
+  return subs.filter(s => s.t>=min && (!q || (s.folio+" "+s.nombre).toLowerCase().includes(q)));
+}
+function render(){
+  const list = visible();
+  const today = subs.filter(s => new Date(s.t).toDateString()===new Date().toDateString()).length;
+  $("note").textContent = subs.length ? `${subs.length} comprobante${subs.length===1?"":"s"} cargado${subs.length===1?"":"s"} · ${today} de hoy · se actualiza solo cada minuto` : "";
+  $("more").hidden = !hasMore;
+  if(!list.length){
+    $("grid").innerHTML = `<div class="empty"><b>${subs.length ? "Nada con ese filtro" : "Todavía no hay comprobantes"}</b>${subs.length ? "Prueba con otro folio, nombre o periodo." : "Cuando un cliente pague por transferencia y suba su foto, aparecerá aquí."}</div>`;
+    return;
+  }
+  $("grid").innerHTML = list.map(s => `
+    <article class="card${s.t>lastSeen&&lastSeen?" new":""}" data-id="${esc(s.id)}">
+      <div class="c-top"><span class="folio">${esc(s.folio||"Sin folio")}</span><span class="when">${esc(fmtWhen(s.t))}</span></div>
+      <div class="who">${esc(s.nombre||"Sin nombre")}</div>
+      <div class="meta">${s.total?`<span class="pill tot">${esc(s.total)}</span>`:""}${s.entrega?`<span class="pill">${esc(s.entrega)}</span>`:""}<span class="pill">${s.files.length} foto${s.files.length===1?"":"s"}</span></div>
+      <div class="thumbs">${s.files.map((f,i)=>`<button type="button" class="thumb" data-view="${esc(s.id)}" data-i="${i}" aria-label="Ver comprobante ${i+1}">${isPdf(f)?`<span class="pdf">PDF</span>`:`<img src="${esc(f.url)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;bad&quot;>Toca para abrir</span>'">`}</button>`).join("") || `<span class="note">Sin archivo</span>`}</div>
+      <div class="acts">${s.files[0]?`<button type="button" class="btn primary" data-view="${esc(s.id)}" data-i="0">Ver foto${s.files.length>1?"s":""}</button><a class="btn" href="${esc(s.files[0].url)}" target="_blank" rel="noopener">Abrir / guardar</a>`:""}<button type="button" class="btn danger" data-del="${esc(s.id)}">Borrar</button></div>
+    </article>`).join("");
+}
+
+async function fetchPage(p){
+  const arr = await api(`/forms/${formId}/submissions?per_page=50&page=${p}`) || [];
+  hasMore = arr.length===50;
+  return arr.map(norm);
+}
+async function refresh(quiet){
+  if(busy) return; busy = true; $("refresh").classList.add("spin");
+  try{
+    if(!formId) formId = await findForm();
+    const fresh = await fetchPage(1);
+    const known = new Set(subs.map(s=>s.id));
+    const added = fresh.filter(s=>!known.has(s.id)).length;
+    const older = subs.filter(s=>!fresh.some(f=>f.id===s.id) && page>1);
+    subs = fresh.concat(older).sort((a,b)=>b.t-a.t);
+    if(!quiet && !subs.length) page = 1;
+    render();
+    if(quiet && added && known.size) toast(`${added} comprobante${added>1?"s":""} nuevo${added>1?"s":""}`);
+  }catch(e){
+    if(e.kind==="clave"){ logout(true); showLoginError(errText(e)); }
+    else if(!quiet || !subs.length){ const [a,b]=errText(e); $("grid").innerHTML=`<div class="err"><b>${esc(a)}</b>${esc(b)}</div>`; $("note").textContent=""; }
+  }finally{ busy=false; $("refresh").classList.remove("spin"); }
+}
+
+function showLoginError([a,b]){ $("lerr").textContent = a+". "+b; $("lerr").hidden=false; }
+function showApp(){
+  $("login").hidden=true; $("app").hidden=false; $("bar").hidden=false; $("refresh").hidden=false; $("logout").hidden=false;
+  lastSeen = +load(SEEN) || 0;
+  $("grid").innerHTML = `<div class="empty"><b>Cargando comprobantes…</b>Un momento.</div>`;
+  refresh(false).then(()=>{ store(SEEN, String(Date.now())); });
+  clearInterval(timer); timer = setInterval(()=>{ if(!document.hidden) refresh(true); }, 60000);
+}
+function logout(keepMsg){
+  token=""; formId=""; subs=[]; store(KEY,null); try{ sessionStorage.removeItem(KEY); }catch(e){}
+  clearInterval(timer);
+  $("app").hidden=true; $("bar").hidden=true; $("refresh").hidden=true; $("logout").hidden=true; $("login").hidden=false;
+  if(!keepMsg) $("lerr").hidden=true;
+  $("tok").value="";
+}
+
+$("lform").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const v = $("tok").value.trim().replace(/^Bearer\s+/i,"");
+  if(v.length<20){ showLoginError(["Esa clave está incompleta","Cópiala completa desde Netlify."]); return; }
+  token = v; $("goBtn").disabled=true; $("goBtn").textContent="Revisando…"; $("lerr").hidden=true;
+  try{
+    formId = await findForm();
+    if($("rem").checked) store(KEY, token); else { try{ sessionStorage.setItem(KEY, token); }catch(_){} }
+    showApp();
+  }catch(err){
+    if(err.kind!=="no-existe") token="";
+    if(err.kind==="no-existe"){ if($("rem").checked) store(KEY, token); showApp(); }
+    else showLoginError(errText(err));
+  }finally{ $("goBtn").disabled=false; $("goBtn").textContent="Entrar"; }
+});
+$("logout").onclick=()=>{ if(confirm("¿Salir del visor? Tendrás que pegar tu clave otra vez.")) logout(); };
+$("refresh").onclick=()=>refresh(false);
+$("q").addEventListener("input", render);
+document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{ period=b.dataset.p; document.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed", x===b)); render(); });
+$("more").onclick=async()=>{
+  $("more").disabled=true;
+  try{ page++; const arr=await fetchPage(page); const known=new Set(subs.map(s=>s.id)); subs=subs.concat(arr.filter(s=>!known.has(s.id))).sort((a,b)=>b.t-a.t); render(); }
+  catch(e){ page--; toast(errText(e)[0]); }
+  finally{ $("more").disabled=false; }
+};
+
+/* Ver en grande */
+let cur=null, curI=0;
+function openLb(id,i){
+  cur = subs.find(s=>s.id===id); if(!cur||!cur.files[i]) return; curI=i;
+  const f=cur.files[i];
+  $("lbT").textContent = `${cur.folio} · ${cur.nombre}${cur.files.length>1?` · ${i+1} de ${cur.files.length}`:""}`;
+  $("lbOpen").href=f.url;
+  $("lbB").innerHTML = isPdf(f) ? `<a class="btn primary" href="${esc(f.url)}" target="_blank" rel="noopener">Abrir PDF</a>` : `<img src="${esc(f.url)}" alt="Comprobante de ${esc(cur.nombre)}" referrerpolicy="no-referrer">`;
+  $("lbF").textContent = cur.files.length>1 ? "Toca la foto para ver la siguiente. En celular: abre la foto y mantenla presionada para guardarla." : "En celular: abre la foto y mantenla presionada para guardarla.";
+  $("lb").hidden=false; document.body.style.overflow="hidden";
+}
+function closeLb(){ $("lb").hidden=true; document.body.style.overflow=""; }
+$("lbX").onclick=closeLb;
+$("lb").addEventListener("click",e=>{ if(e.target===$("lb")||e.target===$("lbB")) closeLb(); else if(e.target.tagName==="IMG"&&cur&&cur.files.length>1) openLb(cur.id,(curI+1)%cur.files.length); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&!$("lb").hidden) closeLb(); });
+
+$("grid").addEventListener("click", async e=>{
+  const v=e.target.closest("[data-view]"); if(v){ openLb(v.dataset.view, +v.dataset.i||0); return; }
+  const d=e.target.closest("[data-del]"); if(!d) return;
+  const s=subs.find(x=>x.id===d.dataset.del); if(!s) return;
+  if(!confirm(`¿Borrar el comprobante ${s.folio||""} de ${s.nombre||"este cliente"}? No se puede deshacer.`)) return;
+  d.disabled=true; d.textContent="Borrando…";
+  try{ await api(`/submissions/${encodeURIComponent(s.id)}`,{method:"DELETE"}); subs=subs.filter(x=>x.id!==s.id); render(); toast("Comprobante borrado"); }
+  catch(err){ d.disabled=false; d.textContent="Borrar"; toast(err.kind==="red"?"No se pudo borrar desde aquí. Bórralo en Netlify → Forms.":errText(err)[0]); }
+});
+
+token = load(KEY) || sload(KEY);
+if(token) showApp(); else $("login").hidden=false;
+})();
+</script>
+</body>
+</html>
